@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moab-balance"
+version = "0.1.0"
+description = "Minimal ball-balancing software for Microsoft Project Moab"
+readme = "README.md"
+requires-python = ">=3.7"
+license = { file = "LICENSE" }
+authors = [{ name = "Alberto" }]
+dependencies = [
+    "numpy",
+    "opencv-python",
+    "spidev; platform_system == 'Linux'",
+    "RPi.GPIO; platform_system == 'Linux'",
+]
+
+[project.scripts]
+moab-balance = "moab_balance.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["moab_balance*"]
