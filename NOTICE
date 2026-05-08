@@ -16,6 +16,23 @@ Specifically, the following pieces are derived from that project:
     plate diameter 0.225 m, field of view ratio 1.05, camera mounted at
     +30 degrees relative to the plate axes) in `moab_balance/camera.py`
     and `moab_balance/vision.py`.
+  * The HAT MCU bootloader GPIO sequence and `mcumgr` invocation in
+    `firmware/flash-hat.sh` (derived from `bin/flash`).
+
+In addition, this project redistributes the following binary file verbatim
+from microsoft/moabian:
+
+  * `firmware/v3.bin` — Build 3.0 (May 2021) of the Project Moab HAT firmware
+    (a Zephyr / MCUboot binary, 112 064 bytes,
+    SHA-256 a2ad9c0c2585c3509b2b7f05c581ef16f3a5e031200096f56b88d303b870779e).
+    Originally at `fw/v3.bin` in microsoft/moabian. Source for the firmware
+    lives at `microsoft/moabian/fw/src/`.
+
+The pre-built SD image build pipeline (`image/`) cross-compiles
+[`mcumgr`](https://github.com/apache/mynewt-mcumgr-cli) (the Apache MyNewt
+Simple Management Protocol CLI) from source and bundles the resulting binary
+at `/usr/local/bin/mcumgr` in the produced image. `mcumgr` is licensed under
+the Apache License 2.0; only the binary is redistributed, not the source.
 
 The original moabian MIT License text is reproduced below.
 

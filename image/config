@@ -1,0 +1,56 @@
+# ============================================================================
+# Pi-gen + build.sh configuration for the moab-balance pre-built SD image.
+# Sourced by both pi-gen's build.sh and our image/build.sh (extra variables
+# beyond what pi-gen documents are used by build.sh only).
+# ============================================================================
+
+# ----- Image identity -------------------------------------------------------
+IMG_NAME='moab-balance'
+TARGET_HOSTNAME='moab'
+PI_GEN_RELEASE='Moab balance'
+
+# ----- Default user (Pi OS Bookworm requires explicit credentials) ---------
+# ⚠ INSECURE DEFAULT. Change FIRST_USER_PASS before flashing a public image,
+# or set it to something unique per device, or unset both and have the OS
+# launch the standard first-boot account-setup wizard instead.
+FIRST_USER_NAME='pi'
+FIRST_USER_PASS='moab'
+DISABLE_FIRST_BOOT_USER_RENAME=1
+
+# ----- Locale ---------------------------------------------------------------
+LOCALE_DEFAULT='en_US.UTF-8'
+KEYBOARD_KEYMAP='us'
+KEYBOARD_LAYOUT='English (US)'
+TIMEZONE_DEFAULT='Etc/UTC'
+
+# ----- Networking -----------------------------------------------------------
+# SSH on by default so you can debug the Pi if balancing misbehaves. Disable
+# (ENABLE_SSH=0) for a more locked-down image.
+ENABLE_SSH=1
+# WiFi is intentionally NOT preconfigured. To add it, drop a wpa_supplicant.conf
+# into the boot partition before first boot, or set WPA_ESSID/WPA_PASSWORD/
+# WPA_COUNTRY here.
+# WPA_COUNTRY='GB'
+# WPA_ESSID=''
+# WPA_PASSWORD=''
+
+# ----- Pi-gen behaviour -----------------------------------------------------
+RELEASE='bookworm'
+STAGE_LIST='stage0 stage1 stage2 stage-moab'
+DEPLOY_COMPRESSION='xz'
+COMPRESSION_LEVEL=6
+APT_PROXY=''
+
+# ----- Pinned upstream refs (used only by image/build.sh) -------------------
+# Pi-gen tag matching the desired Pi OS release/arch. Bookworm 64-bit:
+PIGEN_REPO=${PIGEN_REPO:-https://github.com/RPi-Distro/pi-gen.git}
+PIGEN_REF=${PIGEN_REF:-2025-11-24-raspios-bookworm-arm64}
+
+# mcumgr is cross-compiled from source for the target arch.
+MCUMGR_REPO=${MCUMGR_REPO:-https://github.com/apache/mynewt-mcumgr-cli.git}
+MCUMGR_REF=${MCUMGR_REF:-5c56bd24066c780aad5836429bfa2ecc4f9a944c}
+
+# Target architecture. Pin to a 32-bit pi-gen branch (e.g. bookworm) and set
+# TARGET_GOARCH=arm to build for Pi 3 / Pi Zero 2 instead.
+TARGET_GOARCH=${TARGET_GOARCH:-arm64}
+TARGET_GOARM=${TARGET_GOARM:-7}

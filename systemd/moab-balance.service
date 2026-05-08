@@ -1,9 +1,11 @@
 [Unit]
 Description=Moab minimal ball-balancer
 Documentation=https://github.com/microsoft/moabian
-# Wait for the camera and SPI device to be ready.
-After=multi-user.target dev-spidev0.0.device dev-video0.device
+# Wait for the camera and SPI device to be ready, and for the HAT firmware
+# to be flashed (the flash service is a no-op if already done).
+After=multi-user.target dev-spidev0.0.device dev-video0.device moab-hat-flash.service
 Wants=dev-spidev0.0.device dev-video0.device
+Requires=moab-hat-flash.service
 # Make sure the stock Moab service can never race us for the HAT.
 Conflicts=moab.service
 

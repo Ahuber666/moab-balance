@@ -1,0 +1,9 @@
+# Build artefacts
+cache/
+deploy/
+work/
+pi-gen/
+
+# Generated build inputs (they're rebuilt every run from the repo source)
+stage-moab/01-install-moab/files/opt/moab-balance/
+stage-moab/01-install-moab/files/usr/local/bin/mcumgr

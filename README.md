@@ -17,8 +17,12 @@ the plate finds level, the ball stays centred. That's it.
 | `moab_balance/controller.py`        | 2-axis PID with high-pass-filtered derivative             |
 | `moab_balance/balance.py`           | The 30 Hz main loop                                       |
 | `moab_balance/config.py`            | Every tunable in one dataclass                            |
+| `firmware/v3.bin`                   | Project Moab HAT firmware (vendored from microsoft/moabian, MIT) |
+| `firmware/flash-hat.sh`             | Idempotent HAT MCU flasher (UART + `mcumgr`)              |
 | `systemd/moab-balance.service`      | Systemd unit; replaces `moab.service`                     |
-| `install.sh`                        | One-shot installer for the stock Moabian Pi image         |
+| `systemd/moab-hat-flash.service`    | Oneshot that flashes the HAT firmware on first boot       |
+| `install.sh`                        | One-shot installer for an already-running Pi              |
+| `image/`                            | Build a flash-and-go SD image with `pi-gen` (see below)   |
 
 ## Hardware assumptions
 
@@ -29,9 +33,29 @@ the plate finds level, the ball stays centred. That's it.
   bare Raspberry Pi OS instead, run `sudo raspi-config` and enable SPI and the
   camera before installing.
 
-## Installing on the Pi
+## Two ways to install
 
-Copy this directory to the Pi and run the installer:
+### A. Bake a flash-and-go SD image (recommended for fresh hardware)
+
+`image/build.sh` produces a self-contained Pi OS image that, once flashed and
+booted, balances on its own — no SSH, no manual steps. It cross-compiles
+[`mcumgr`](https://github.com/apache/mynewt-mcumgr-cli), bundles the vendored
+HAT firmware, and runs Microsoft's MCU bootloader sequence on first boot to
+flash the HAT. See [`image/README.md`](image/README.md) for the full recipe.
+
+```bash
+cd image && ./build.sh
+# → image/deploy/<date>-moab-balance-lite.img.xz
+# Flash with Raspberry Pi Imager → insert SD → power on → balancing.
+```
+
+Requires Docker on your build machine. First build ~30–45 minutes; subsequent
+builds reuse pi-gen's cache.
+
+### B. Install on an already-running Pi
+
+Copy this directory to the Pi (whether it's running stock Moabian or a fresh
+Raspberry Pi OS install) and run the installer:
 
 ```bash
 scp -r . pi@moab.local:~/moab-balance
@@ -42,11 +66,12 @@ sudo ./install.sh
 
 The installer will:
 
-1. Stop and disable the stock `moab.service`.
+1. Stop and disable the stock `moab.service` (if present).
 2. Copy the package to `/opt/moab-balance`.
 3. Install runtime dependencies via `apt` (`python3-opencv`, `python3-numpy`,
-   `python3-rpi.gpio`, `python3-spidev`) and create a small venv.
-4. Enable and start `moab-balance.service`.
+   `python3-rpi.gpio`, `python3-spidev`, `raspi-gpio`) and create a small venv.
+4. Enable `moab-hat-flash.service` (oneshot, flashes the HAT MCU on next boot
+   if not already done) and `moab-balance.service`.
 
 After that, every reboot brings the plate up live and balancing.
 
@@ -54,6 +79,13 @@ After that, every reboot brings the plate up live and balancing.
 journalctl -u moab-balance.service -f      # live logs
 sudo systemctl restart moab-balance        # restart after editing config.py
 ```
+
+> **Note:** if you install on a *bare* Pi OS (not the stock Moabian image),
+> you'll also need `mcumgr` at `/usr/local/bin/mcumgr` for the HAT firmware
+> flash to work. The pre-built SD image (option A) handles this for you. To
+> install `mcumgr` manually on a Pi: `go install
+> github.com/apache/mynewt-mcumgr-cli/mcumgr@latest && sudo cp ~/go/bin/mcumgr
+> /usr/local/bin/`.
 
 ## Tuning
 
