@@ -118,7 +118,10 @@ if [[ ! -d "${PIGEN_DIR}/.git" ]]; then
 fi
 git -C "${PIGEN_DIR}" fetch --quiet --tags origin
 git -C "${PIGEN_DIR}" reset --quiet --hard "${PIGEN_REF}"
-git -C "${PIGEN_DIR}" clean --quiet -fdx -- 'work*' 'deploy*' 'stage-moab*' 'config*' || true
+# Only wipe stuff *we* inject (stage-moab/, config). Leave pi-gen's `work/` and
+# `deploy/` alone so the apt cache from a previous run is reused — that turns
+# the second-and-later builds from ~30 min into a few minutes.
+git -C "${PIGEN_DIR}" clean --quiet -fdx -- 'stage-moab*' 'config' 'config.local' || true
 
 # ---------------------------------------------------------------------------
 # 4. Drop our config + stage-moab into pi-gen

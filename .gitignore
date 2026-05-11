@@ -23,3 +23,6 @@ env/
 *.local.py
 /tmp/
 *.log
+
+# Accidentally nested clones / worktrees of this same repo
+/moab-balance/
