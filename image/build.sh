@@ -141,8 +141,26 @@ done
 # ---------------------------------------------------------------------------
 # 5. Run pi-gen
 # ---------------------------------------------------------------------------
+# Pi-gen's build-docker.sh refuses to start if its `pigen_work` container
+# already exists (from an earlier run) unless CONTINUE=1 is passed. When the
+# container is around, reuse it — that's where stage0/1/2's apt cache lives,
+# and resuming saves ~30 minutes. To force a clean rebuild, run with FRESH=1.
+PIGEN_CONTAINER_NAME="${PIGEN_CONTAINER_NAME:-pigen_work}"
+if [[ "${FRESH:-0}" = "1" ]]; then
+    if docker ps -a --filter "name=^${PIGEN_CONTAINER_NAME}$" -q | grep -q .; then
+        log "FRESH=1 set → removing existing ${PIGEN_CONTAINER_NAME} container"
+        docker rm -fv "${PIGEN_CONTAINER_NAME}" >/dev/null
+    fi
+    PIGEN_CONTINUE=0
+elif docker ps -a --filter "name=^${PIGEN_CONTAINER_NAME}$" -q | grep -q .; then
+    log "Reusing existing ${PIGEN_CONTAINER_NAME} container (CONTINUE=1)"
+    PIGEN_CONTINUE=1
+else
+    PIGEN_CONTINUE=0
+fi
+
 log "Invoking pi-gen build-docker.sh (this is the long part)..."
-(cd "${PIGEN_DIR}" && ./build-docker.sh)
+(cd "${PIGEN_DIR}" && CONTINUE="${PIGEN_CONTINUE}" ./build-docker.sh)
 
 # ---------------------------------------------------------------------------
 # 6. Copy artefacts into image/deploy/
